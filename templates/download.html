@@ -1,0 +1,277 @@
+{% extends 'layout.html' %}
+
+{% block title %}Download Options - YouTube Downloader{% endblock %}
+
+{% block content %}
+    <div class="container my-5">
+        {% if video_info.is_playlist %}
+            <!-- Playlist Interface -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="m-0">Playlist: {{ video_info.title }}</h3>
+                    <span class="badge bg-primary">{{ video_info.entries|length }} videos</span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5>Set default quality for all videos:</h5>
+                        <div class="btn-group mb-3" role="group">
+                            <button type="button" class="btn btn-outline-primary playlist-quality" data-quality="highest">Highest Quality</button>
+                            <button type="button" class="btn btn-outline-primary playlist-quality" data-quality="medium">Medium Quality</button>
+                            <button type="button" class="btn btn-outline-primary playlist-quality" data-quality="lowest">Lowest Quality</button>
+                            <button type="button" class="btn btn-outline-primary playlist-quality" data-quality="audio">Audio Only</button>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        {% for video in video_info.entries %}
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 playlist-video">
+                                    <div class="d-flex">
+                                        <div class="playlist-thumbnail">
+                                            {% if video.thumbnail %}
+                                                <img src="{{ video.thumbnail }}" alt="{{ video.title }}" class="img-fluid" style="max-width: 120px;">
+                                            {% else %}
+                                                <div class="placeholder-thumbnail bg-light d-flex align-items-center justify-content-center" style="width: 120px; height: 90px;">
+                                                    <i class="fas fa-video text-secondary"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="card-body d-flex flex-column">
+                                            <h6 class="card-title mb-2">{{ video.title }}</h6>
+                                            <p class="card-text small mb-2">
+                                                <i class="fas fa-clock me-1"></i> {{ video.duration_string }}
+                                            </p>
+                                            <div class="mt-auto">
+                                                <div class="btn-group w-100" role="group">
+                                                    <a href="{{ video.url }}" class="btn btn-sm btn-outline-secondary" target="_blank">
+                                                        <i class="fab fa-youtube"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary download-playlist-item" data-video-url="{{ video.url }}">
+                                                        <i class="fas fa-download"></i> Download
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- Single Video Interface -->
+            <div class="row">
+                <div class="col-md-5">
+                    <!-- Video Information Card -->
+                    <div class="card video-info-card mb-4">
+                        <!-- Video Preview (Embed) -->
+                        <div class="video-embed-container">
+                            <iframe width="100%" height="250" src="{{ video_info.embed_url }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                        
+                        <div class="video-details">
+                            <h2 class="video-title">{{ video_info.title }}</h2>
+                            <p class="video-channel">
+                                <i class="fas fa-user me-1"></i> {{ video_info.channel }}
+                            </p>
+                            <p class="video-stats">
+                                <span><i class="fas fa-clock me-1"></i> {{ video_info.duration_string }}</span>
+                                {% if video_info.view_count %}
+                                <span class="ms-3"><i class="fas fa-eye me-1"></i> {{ "{:,}".format(video_info.view_count) }} views</span>
+                                {% endif %}
+                            </p>
+                            
+                            <a href="{{ youtube_url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="fab fa-youtube"></i> Watch on YouTube
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-7">
+                    <!-- Download Options -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h3 class="m-0">Download Options</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="download-form">
+                                <!-- Default to the first video format if available -->
+                                <input type="hidden" id="format-select" name="format" 
+                                    value="{{ video_info.video_formats[0].format_id if video_info.video_formats else 
+                                            (video_info.audio_formats[0].format_id if video_info.audio_formats else 'best') }}">
+                                
+                                <!-- Format Tabs -->
+                                <ul class="nav nav-tabs mb-3" id="formatTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="video-tab" data-bs-toggle="tab" data-bs-target="#video-formats" type="button" role="tab" aria-controls="video-formats" aria-selected="true">
+                                            <i class="fas fa-video me-2"></i>Video
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="audio-tab" data-bs-toggle="tab" data-bs-target="#audio-formats" type="button" role="tab" aria-controls="audio-formats" aria-selected="false">
+                                            <i class="fas fa-music me-2"></i>Audio
+                                        </button>
+                                    </li>
+                                </ul>
+                                
+                                <!-- Tab content -->
+                                <div class="tab-content" id="formatTabsContent">
+                                    <!-- Video Formats Tab -->
+                                    <div class="tab-pane fade show active" id="video-formats" role="tabpanel" aria-labelledby="video-tab">
+                                        <div class="format-selector">
+                                            {% if video_info.video_formats %}
+                                                {% for format in video_info.video_formats %}
+                                                <div class="format-option {% if loop.first %}selected{% endif %}" data-format-id="{{ format.format_id }}">
+                                                    <div class="format-option-details">
+                                                        <span class="format-resolution">{{ format.description }}</span>
+                                                        <span class="format-size">{{ format.filesize }}</span>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                <div class="alert alert-info">No video formats available for this content.</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Audio Formats Tab -->
+                                    <div class="tab-pane fade" id="audio-formats" role="tabpanel" aria-labelledby="audio-tab">
+                                        <div class="format-selector">
+                                            {% if video_info.audio_formats %}
+                                                {% for format in video_info.audio_formats %}
+                                                <div class="format-option" data-format-id="{{ format.format_id }}">
+                                                    <div class="format-option-details">
+                                                        <span class="format-resolution">
+                                                            <i class="fas fa-music me-1"></i> 
+                                                            Audio {{ format.format_note }} {{ format.ext }}
+                                                        </span>
+                                                        <span class="format-size">{{ format.filesize }}</span>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                <div class="alert alert-info">No audio-only formats available for this content.</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Advanced Options -->
+                                <div class="advanced-options mt-4">
+                                    <div class="advanced-toggle" id="advanced-toggle">Show Advanced Options</div>
+                                    <div class="advanced-options-form" id="advanced-options-form">
+                                        <div class="mb-3">
+                                            <label for="advanced-options" class="form-label">YT-DLP Advanced Options:</label>
+                                            <textarea class="form-control" id="advanced-options" name="advanced_options" rows="3" placeholder="--extract-audio --audio-format mp3"></textarea>
+                                            <small class="form-text text-muted">
+                                                Enter YT-DLP command line options. Example: --extract-audio --audio-format mp3
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid gap-2 mt-4">
+                                    <button type="button" id="download-btn" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                </div>
+                                
+                                <!-- Progress indicator -->
+                                <div id="progress-container" class="progress-container" style="display: none;">
+                                    <p class="text-center">Processing your download...</p>
+                                    <div class="progress">
+                                        <div id="download-progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Download container - will be populated after processing -->
+                                <div id="download-container" class="mt-4"></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Information Section -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h4>About YouTube Downloads</h4>
+                <p>Please note that downloading YouTube videos may be against YouTube's terms of service. Always respect copyright and only download videos when you have the right to do so or when the content is licensed for download.</p>
+                <p>This tool is provided for educational purposes and for downloading content with appropriate permissions.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Switch between video and audio tabs - update format selection
+        const formatTabs = document.querySelectorAll('button[data-bs-toggle="tab"]');
+        if (formatTabs) {
+            formatTabs.forEach(tab => {
+                tab.addEventListener('shown.bs.tab', function(e) {
+                    // Find the first format option in the newly activated tab and select it
+                    const activePane = document.querySelector(e.target.dataset.bsTarget);
+                    if (activePane) {
+                        const firstOption = activePane.querySelector('.format-option');
+                        if (firstOption) {
+                            // Deselect all options
+                            document.querySelectorAll('.format-option').forEach(opt => {
+                                opt.classList.remove('selected');
+                            });
+                            
+                            // Select the first option in this tab
+                            firstOption.classList.add('selected');
+                            
+                            // Update the hidden format select
+                            const formatSelect = document.getElementById('format-select');
+                            if (formatSelect) {
+                                formatSelect.value = firstOption.dataset.formatId;
+                            }
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Playlist quality selection
+        const qualityButtons = document.querySelectorAll('.playlist-quality');
+        if (qualityButtons) {
+            qualityButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    qualityButtons.forEach(b => b.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Store selected quality
+                    const quality = this.dataset.quality;
+                    document.querySelectorAll('.download-playlist-item').forEach(item => {
+                        item.dataset.quality = quality;
+                    });
+                });
+            });
+        }
+        
+        // Playlist item download
+        const playlistDownloadButtons = document.querySelectorAll('.download-playlist-item');
+        if (playlistDownloadButtons) {
+            playlistDownloadButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const videoUrl = this.dataset.videoUrl;
+                    const quality = this.dataset.quality || 'highest';
+                    
+                    // Here you would normally fetch the video info and show a download modal
+                    // For simplicity, we'll just redirect to the download page for this video
+                    window.location.href = `/validate-url?youtube_url=${encodeURIComponent(videoUrl)}`;
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

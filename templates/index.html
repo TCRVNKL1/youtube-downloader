@@ -1,0 +1,109 @@
+{% extends 'layout.html' %}
+
+{% block title %}YouTube Downloader - Download YouTube Videos Easily{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <h1 class="hero-title">Download YouTube Videos Easily</h1>
+                    <p class="hero-subtitle">Free YouTube video downloader that helps you download videos in the format and quality of your choice.</p>
+                    
+                    <!-- URL Input Form -->
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="youtube-url-form">
+                                <div class="mb-3">
+                                    <label for="youtube-url" class="form-label">YouTube Video URL</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="youtube-url" name="youtube_url" 
+                                           placeholder="https://www.youtube.com/watch?v=..." required>
+                                        <button type="submit" class="btn btn-primary" id="validate-url-btn">
+                                            <i class="fas fa-search"></i> Get Video
+                                        </button>
+                                    </div>
+                                    <small class="form-text text-muted">Paste a valid YouTube video URL to start</small>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading Indicator -->
+                    <div id="loading-indicator" style="display: none;">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+                <div class="col-lg-5 d-none d-lg-block">
+                    <!-- YouTube Icon - Using SVG for better quality -->
+                    <svg viewBox="0 0 24 24" width="200" height="200" class="mx-auto d-block">
+                        <path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Video Info Container (will be populated via JavaScript) -->
+    <div id="video-info-container" class="container mb-5"></div>
+    
+    <!-- Features Section -->
+    <section class="features-section bg-light" id="how-it-works">
+        <div class="container">
+            <h2 class="text-center mb-5">How It Works</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <h3 class="feature-title">Paste URL</h3>
+                        <p class="feature-description">Copy the YouTube video URL and paste it in the input field above.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <h3 class="feature-title">Choose Format</h3>
+                        <p class="feature-description">Select your preferred video quality and format from the available options.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <h3 class="feature-title">Download</h3>
+                        <p class="feature-description">Click the download button and save the video to your device.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Additional Features -->
+    <section class="container my-5">
+        <h2 class="text-center mb-4">Advanced Features</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-sliders-h text-primary me-2"></i> Advanced Options</h5>
+                        <p class="card-text">Access YT-DLP's powerful parameters for customized downloads. Configure advanced settings like video codec, audio quality, and more.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-exchange-alt text-primary me-2"></i> Format Conversion</h5>
+                        <p class="card-text">Convert videos to different formats like MP4, MP3, AVI, and more. Choose the format that works best for your device.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
