@@ -55,7 +55,7 @@ Make sure the following are installed on your system:
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/youtube-downloader.git
+git clone https://github.com/TCRVNKL1/youtube-downloader.git
 cd youtube-downloader
 ```
 
